@@ -16,18 +16,28 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
-	"os"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
 
+type Config struct {
+	TemplateDir string `mapstructure:"template_dir"`
+}
+
+var config Config
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
+	Version: "0.0.1",
 	Use:   "tmpl",
 	Short: "A brief description of your application",
 	Long: `A longer description that spans multiple lines and likely contains
@@ -39,6 +49,28 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		dir := fmt.Sprintf("%s/%s", config.TemplateDir, args[0])
+		files, err := ioutil.ReadDir(dir)
+		if err != nil {
+			_ = fmt.Errorf("unable to decode into struct, %v", err)
+			os.Exit(1)
+		}
+		for _, file := range files {
+			err := os.Symlink(fmt.Sprintf("%s/%s", dir, file.Name()), fmt.Sprintf("./%s", file.Name()))
+			if err == nil {
+				_, _ = fmt.Printf("created %s symlink\n", file.Name())
+			} else {
+				_, _ = fmt.Printf("could not created %s symlink\n", file.Name())
+			}
+		}
+	},
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return errors.New("requires template name")
+		}
+		return nil
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -63,23 +95,23 @@ func init() {
 
 // initConfig reads in config file and ENV variables if set.
 func initConfig() {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
+	if cfgFile == "" {
 		home, err := homedir.Dir()
 		cobra.CheckErr(err)
 
-		// Search config in home directory with name ".tmpl" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".tmpl")
+		cfgFile = home+"/.config/comb/config.toml"
 	}
+	viper.SetConfigFile(cfgFile)
 
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+	if err := viper.ReadInConfig(); err != nil {
+		config.TemplateDir = filepath.Dir(cfgFile)+"/templates"
+	} else {
+		if err := viper.Unmarshal(&config); err != nil {
+			_ = fmt.Errorf("unable to decode into struct, %v", err)
+			os.Exit(1)
+		}
 	}
 }
