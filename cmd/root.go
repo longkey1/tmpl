@@ -50,6 +50,7 @@ to quickly create a Cobra application.`,
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("%#v\n", config.TemplateDir)
 		dir := fmt.Sprintf("%s/%s", config.TemplateDir, args[0])
 		files, err := ioutil.ReadDir(dir)
 		if err != nil {
@@ -99,7 +100,7 @@ func initConfig() {
 		home, err := homedir.Dir()
 		cobra.CheckErr(err)
 
-		cfgFile = home+"/.config/comb/config.toml"
+		cfgFile = home+"/.config/tmpl/config.toml"
 	}
 	viper.SetConfigFile(cfgFile)
 
