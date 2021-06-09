@@ -72,7 +72,7 @@ func initConfig() {
 		cobra.CheckErr(err)
 
 		// Search config in home/.config/toml directory with name "config.toml" (without extension).
-		viper.AddConfigPath(home+"/.config/toml")
+		viper.AddConfigPath(home+"/.config/uonfig.toml")
 		viper.SetConfigName("config")
 		viper.SetConfigType("toml")
 	}
