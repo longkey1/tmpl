@@ -56,7 +56,7 @@ var registerCmd = &cobra.Command{
 
 		originalFilePath := fmt.Sprintf("%s/%s", wd, originalFileName)
 		err = os.Rename(originalFilePath, templateFilePath)
-		if _, err := os.Stat(templateFilePath); !os.IsNotExist(err) {
+		if _, err := os.Stat(templateFilePath); os.IsNotExist(err) {
 			log.Fatalf("unable to move from %s to %s", originalFilePath, templateFilePath)
 		}
 
