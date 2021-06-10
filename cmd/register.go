@@ -25,9 +25,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// makeCmd represents the make command
-var makeCmd = &cobra.Command{
-	Use:   "make",
+// registerCmd represents the register command
+var registerCmd = &cobra.Command{
+	Use:   "register",
 	Short: "A brief description of your command",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 1 {
@@ -68,15 +68,15 @@ var makeCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(makeCmd)
+	rootCmd.AddCommand(registerCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// makeCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// registerCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// makeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// registerCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
