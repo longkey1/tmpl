@@ -40,30 +40,32 @@ var registerCmd = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
-		tn := path.Base(wd)
-		td := fmt.Sprintf("%s/%s", config.TemplateDir, tn)
-		if _, err := os.Stat(td); os.IsNotExist(err) {
-			err := os.MkdirAll(td, os.ModePerm)
+		originalFileName := args[0]
+		templateName := path.Base(wd)
+		templateDirPath := fmt.Sprintf("%s/%s", config.TemplateDir, templateName)
+		if _, err := os.Stat(templateDirPath); os.IsNotExist(err) {
+			err := os.MkdirAll(templateDirPath, os.ModePerm)
 			if err != nil {
-				log.Fatalf("unable to make %s directory", td)
+				log.Fatalf("unable to make %s directory", templateDirPath)
 			}
 		}
-		tf := fmt.Sprintf("%s/%s", td, args[0])
-		if _, err := os.Stat(tf); !os.IsNotExist(err) {
-			log.Fatalf("already %s exists", tf)
+		templateFilePath := fmt.Sprintf("%s/%s", templateDirPath, originalFileName)
+		if _, err := os.Stat(templateFilePath); !os.IsNotExist(err) {
+			log.Fatalf("already %s exists", templateFilePath)
 		}
 
-		err = os.Rename(fmt.Sprintf("%s/%s", wd, tf), fmt.Sprintf("%s/%s", td, tf))
-		if _, err := os.Stat(tf); !os.IsNotExist(err) {
-			log.Fatalf("unable to move from %s to %s", fmt.Sprintf("%s/%s", wd, tf), fmt.Sprintf("%s/%s", td, tf))
+		originalFilePath := fmt.Sprintf("%s/%s", wd, originalFileName)
+		err = os.Rename(originalFilePath, templateFilePath)
+		if _, err := os.Stat(templateFilePath); !os.IsNotExist(err) {
+			log.Fatalf("unable to move from %s to %s", originalFilePath, templateFilePath)
 		}
 
-		err = os.Symlink(fmt.Sprintf("%s/%s", td, tf), fmt.Sprintf("./%s", tf))
+		err = os.Symlink(templateDirPath, fmt.Sprintf("./%s", originalFileName))
 		if err != nil {
-			log.Fatalf("unable to symlink from %s to %s", fmt.Sprintf("%s/%s", td, tf), fmt.Sprintf("./%s", tf))
+			log.Fatalf("unable to symlink from %s to %s", templateFilePath, fmt.Sprintf("./%s", originalFileName))
 		}
 
-		_, _ = fmt.Printf("made %s template to %s, and symlink\n", tf, tn)
+		_, _ = fmt.Printf("register %s template to %s, and symlink\n", templateName, templateFilePath)
 	},
 }
 
