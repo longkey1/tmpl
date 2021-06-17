@@ -60,7 +60,7 @@ var registerCmd = &cobra.Command{
 			log.Fatalf("unable to move from %s to %s", originalFilePath, templateFilePath)
 		}
 
-		err = os.Symlink(templateDirPath, fmt.Sprintf("./%s", originalFileName))
+		err = os.Symlink(templateFilePath, fmt.Sprintf("./%s", originalFileName))
 		if err != nil {
 			log.Fatalf("unable to symlink from %s to %s", templateFilePath, fmt.Sprintf("./%s", originalFileName))
 		}
