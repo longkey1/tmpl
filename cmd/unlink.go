@@ -16,8 +16,10 @@ limitations under the License.
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 
@@ -50,6 +52,55 @@ var unlinkCmd = &cobra.Command{
 			} else {
 				_, _ = fmt.Printf("not removed %s symlink\n", file.Name())
 			}
+		}
+
+
+		_, err = os.Stat(".git/info/exclude")
+		if err != nil {
+			return
+		}
+
+		excludeCurrent, err :=  os.Open(".git/info/exclude")
+		if err != nil {
+			return
+		}
+		defer func(excludeCurrent *os.File) {
+			err := excludeCurrent.Close()
+			if err != nil {
+				log.Fatalf("unable to close .git/info/exclude. %v" ,err)
+			}
+		}(excludeCurrent)
+
+		excludeNew, err := os.Create(".git/info/exclude.new")
+		if err != nil {
+			log.Fatalf("unable to create .git/info/exclude.new. %v" ,err)
+		}
+		defer func(excludeNew *os.File) {
+			err := excludeNew.Close()
+			if err != nil {
+				log.Fatalf("enable to close .git/info/exclude.new. %v" ,err)
+			}
+		}(excludeNew)
+
+		scanner := bufio.NewScanner(excludeCurrent)
+		for scanner.Scan() {
+			if scanner.Text() == "###> tmpl ###" {
+				for scanner.Scan() {
+					if scanner.Text() == "###< tmpl ###" {
+						continue
+					}
+				}
+			} else {
+				_, err := excludeNew.WriteString(scanner.Text()+"\n")
+				if err != nil {
+					log.Fatalf("unable to write to .git/info/exclude.new. %v" ,err)
+				}
+			}
+		}
+
+		err = os.Rename(excludeNew.Name(), excludeCurrent.Name())
+		if err != nil {
+			log.Fatalf("unable to rename from %s to %s. %v" ,excludeCurrent.Name(), excludeNew.Name(), err)
 		}
 	},
 }
