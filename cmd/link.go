@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -39,14 +40,29 @@ var linkCmd = &cobra.Command{
 		if len(args) > 0 {
 			tn = args[0]
 		}
-		td := fmt.Sprintf("%s/%s", config.TemplateDir, tn)
+		td := filepath.Join(config.TemplateDir, tn)
 		files, err := ioutil.ReadDir(td)
 		if err != nil {
 			_ = fmt.Errorf("unable to decode into struct, %v", err)
 			os.Exit(1)
 		}
+
+		isForce, err := cmd.Flags().GetBool("force")
+		if err != nil {
+			log.Fatalf("unable to get `force` frag. %v" , err)
+		}
 		for _, file := range files {
-			err := os.Symlink(fmt.Sprintf("%s/%s", td, file.Name()), fmt.Sprintf("./%s", file.Name()))
+			if isForce {
+				_, err := os.Stat(file.Name())
+				if err == nil {
+					err := os.RemoveAll(file.Name())
+					if err != nil {
+						log.Fatalf("unable to remove %s frag. %v", file.Name(), err)
+					}
+				}
+			}
+
+			err := os.Symlink(filepath.Join(td, file.Name()), filepath.Join(".", file.Name()))
 			if err == nil {
 				_, _ = fmt.Printf("created %s symlink\n", file.Name())
 			} else {
@@ -54,30 +70,32 @@ var linkCmd = &cobra.Command{
 			}
 		}
 
-		_, err = os.Stat(".git/info/exclude")
+		gitInfoExclude := filepath.Join(".git", "info", "exclude")
+		gitInfoExcludeNew := filepath.Join(".git", "info", "excludeNew")
+		_, err = os.Stat(gitInfoExclude)
 		if err != nil {
 			return
 		}
 
-		excludeCurrent, err :=  os.Open(".git/info/exclude")
+		excludeCurrent, err :=  os.Open(gitInfoExclude)
 		if err != nil {
 			return
 		}
 		defer func(excludeCurrent *os.File) {
 			err := excludeCurrent.Close()
 			if err != nil {
-				log.Fatalf("unable to close .git/info/exclude. %v" ,err)
+				log.Fatalf("unable to close %s. %v", gitInfoExclude, err)
 			}
 		}(excludeCurrent)
 
-		excludeNew, err := os.Create(".git/info/exclude.new")
+		excludeNew, err := os.Create(gitInfoExcludeNew)
 		if err != nil {
-			log.Fatalf("unable to create .git/info/exclude.new. %v" ,err)
+			log.Fatalf("unable to create %s, %v", gitInfoExcludeNew, err)
 		}
 		defer func(excludeNew *os.File) {
 			err := excludeNew.Close()
 			if err != nil {
-				log.Fatalf("enable to close .git/info/exclude.new. %v" ,err)
+				log.Fatalf("enable to close %s, %v", gitInfoExcludeNew, err)
 			}
 		}(excludeNew)
 
@@ -92,7 +110,7 @@ var linkCmd = &cobra.Command{
 			} else {
 				_, err := excludeNew.WriteString(scanner.Text()+"\n")
 				if err != nil {
-					log.Fatalf("unable to write to .git/info/exclude.new. %v" ,err)
+					log.Fatalf("unable to write to %s, %v", gitInfoExcludeNew, err)
 				}
 			}
 		}
@@ -100,17 +118,17 @@ var linkCmd = &cobra.Command{
 		if len(files) > 0 {
 			_, err = excludeNew.WriteString("###> tmpl ###\n")
 			if err != nil {
-				log.Fatalf("unable to write start line to .git/info/exclude.new. %v" ,err)
+				log.Fatalf("unable to write start line to %s, %v", gitInfoExcludeNew, err)
 			}
 			for _, file := range files {
 				_, err = excludeNew.WriteString(fmt.Sprintf("/%s\n", file.Name()))
 				if err != nil {
-					log.Fatalf("unable to write start line to .git/info/exclude.new. %v" ,err)
+					log.Fatalf("unable to write start line to %s, %v" , gitInfoExcludeNew, err)
 				}
 			}
 			_, err = excludeNew.WriteString("###< tmpl ###\n")
 			if err != nil {
-				log.Fatalf("unable to write end line to .git/info/exclude.new. %v" ,err)
+				log.Fatalf("unable to write end line to %s, %v", gitInfoExcludeNew, err)
 			}
 		}
 
@@ -133,4 +151,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// linkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	linkCmd.Flags().BoolP("force", "f", false, "force link")
 }

@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -54,31 +55,32 @@ var unlinkCmd = &cobra.Command{
 			}
 		}
 
-
-		_, err = os.Stat(".git/info/exclude")
+		gitInfoExclude := filepath.Join(".git", "info", "exclude")
+		gitInfoExcludeNew := filepath.Join(".git", "info", "excludeNew")
+		_, err = os.Stat(gitInfoExclude)
 		if err != nil {
 			return
 		}
 
-		excludeCurrent, err :=  os.Open(".git/info/exclude")
+		excludeCurrent, err :=  os.Open(gitInfoExclude)
 		if err != nil {
 			return
 		}
 		defer func(excludeCurrent *os.File) {
 			err := excludeCurrent.Close()
 			if err != nil {
-				log.Fatalf("unable to close .git/info/exclude. %v" ,err)
+				log.Fatalf("unable to close %s. %v", gitInfoExclude, err)
 			}
 		}(excludeCurrent)
 
-		excludeNew, err := os.Create(".git/info/exclude.new")
+		excludeNew, err := os.Create(gitInfoExcludeNew)
 		if err != nil {
-			log.Fatalf("unable to create .git/info/exclude.new. %v" ,err)
+			log.Fatalf("unable to create %s, %v", gitInfoExcludeNew, err)
 		}
 		defer func(excludeNew *os.File) {
 			err := excludeNew.Close()
 			if err != nil {
-				log.Fatalf("enable to close .git/info/exclude.new. %v" ,err)
+				log.Fatalf("enable to close %s, %v", gitInfoExcludeNew, err)
 			}
 		}(excludeNew)
 
@@ -93,7 +95,7 @@ var unlinkCmd = &cobra.Command{
 			} else {
 				_, err := excludeNew.WriteString(scanner.Text()+"\n")
 				if err != nil {
-					log.Fatalf("unable to write to .git/info/exclude.new. %v" ,err)
+					log.Fatalf("unable to write to %s, %v", gitInfoExcludeNew, err)
 				}
 			}
 		}
