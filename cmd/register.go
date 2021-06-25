@@ -18,14 +18,15 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/spf13/cobra"
+	"io"
+	"io/fs"
 	"log"
 	"os"
 	"path"
-
-	"github.com/spf13/cobra"
+	"path/filepath"
 )
 
-// registerCmd represents the register command
 var registerCmd = &cobra.Command{
 	Use:   "register",
 	Short: "A brief description of your command",
@@ -42,25 +43,65 @@ var registerCmd = &cobra.Command{
 		}
 		originalFileName := args[0]
 		templateName := path.Base(wd)
-		templateDirPath := fmt.Sprintf("%s/%s", config.TemplateDir, templateName)
+		templateDirPath := filepath.Join(config.TemplateDir, templateName)
 		if _, err := os.Stat(templateDirPath); os.IsNotExist(err) {
 			err := os.MkdirAll(templateDirPath, os.ModePerm)
 			if err != nil {
 				log.Fatalf("unable to make %s directory", templateDirPath)
 			}
 		}
-		templateFilePath := fmt.Sprintf("%s/%s", templateDirPath, originalFileName)
+		templateFilePath := filepath.Join(templateDirPath, originalFileName)
 		if _, err := os.Stat(templateFilePath); !os.IsNotExist(err) {
 			log.Fatalf("already %s exists", templateFilePath)
 		}
 
-		originalFilePath := fmt.Sprintf("%s/%s", wd, originalFileName)
-		err = os.Rename(originalFilePath, templateFilePath)
-		if _, err := os.Stat(templateFilePath); os.IsNotExist(err) {
-			log.Fatalf("unable to move from %s to %s", originalFilePath, templateFilePath)
+		originalFilePath := filepath.Join(wd, originalFileName)
+		err = filepath.Walk(originalFilePath, func(orgPath string, info fs.FileInfo, err error) error {
+			rel, err := filepath.Rel(originalFilePath, orgPath)
+			if err != nil {
+				return err
+			}
+			tmpPath := filepath.Join(templateFilePath, rel)
+			if info.IsDir() {
+				err := os.MkdirAll(tmpPath, os.ModePerm)
+				if err != nil {
+					return err
+				}
+			} else {
+				src, err := os.Open(orgPath)
+				if err != nil {
+					return err
+				}
+				defer func(src *os.File) {
+					err := src.Close()
+					if err != nil {
+						log.Fatalf("unable to close %s for copy", src.Name())
+					}
+				}(src)
+
+				dst, err := os.Create(tmpPath)
+				if err != nil {
+					return err
+				}
+				defer func(dst *os.File) {
+					err := dst.Close()
+					if err != nil {
+						log.Fatalf("unable to close %s for copy", src.Name())
+					}
+				}(dst)
+
+				_, err = io.Copy(dst, src)
+				if  err != nil {
+					return err
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			log.Fatalf("unable to copy %s, %v", originalFilePath, err)
 		}
 
-		_, _ = fmt.Printf("register %s template to %s, and symlink\n", templateName, templateFilePath)
+		_, _ = fmt.Printf("register %s template to %s\n", templateName, templateFilePath)
 	},
 }
 
