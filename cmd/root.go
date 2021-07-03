@@ -36,7 +36,7 @@ var config Config
 var rootCmd = &cobra.Command{
 	Version: "0.2.7",
 	Use:   "tmpl",
-	Short: "A brief description of your application",
+	Short: "template file linker",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
