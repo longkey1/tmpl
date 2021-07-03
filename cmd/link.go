@@ -30,7 +30,7 @@ import (
 // linkCmd represents the link command
 var linkCmd = &cobra.Command{
 	Use:   "link",
-	Short: "A brief description of your command",
+	Short: "create symlink to template files",
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
 		if err != nil {

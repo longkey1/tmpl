@@ -30,7 +30,7 @@ import (
 // unlinkCmd represents the clean command
 var unlinkCmd = &cobra.Command{
 	Use:   "unlink",
-	Short: "A brief description of your command",
+	Short: "remove symlink to template files",
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
 		if err != nil {
