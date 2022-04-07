@@ -160,5 +160,5 @@ func init() {
 	// is called directly, e.g.:
 	// linkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	linkCmd.Flags().BoolP("force", "f", false, "force link")
-	linkCmd.Flags().BoolP("hard", "h", false, "hard link")
+	linkCmd.Flags().BoolP("hard", "", false, "hard link")
 }
