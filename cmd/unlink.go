@@ -30,7 +30,7 @@ import (
 // unlinkCmd represents the clean command
 var unlinkCmd = &cobra.Command{
 	Use:   "unlink",
-	Short: "remove symlink or hardlink to template files",
+	Short: "remove symbolic link or hard link to template files",
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
 		if err != nil {
@@ -49,9 +49,9 @@ var unlinkCmd = &cobra.Command{
 		for _, file := range files {
 			err := os.Remove(fmt.Sprintf("./%s", file.Name()))
 			if err == nil {
-				_, _ = fmt.Printf("removed %s symlink\n", file.Name())
+				_, _ = fmt.Printf("removed %s link\n", file.Name())
 			} else {
-				_, _ = fmt.Printf("not removed %s symlink\n", file.Name())
+				_, _ = fmt.Printf("not removed %s link\n", file.Name())
 			}
 		}
 

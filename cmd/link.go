@@ -30,7 +30,7 @@ import (
 // linkCmd represents the link command
 var linkCmd = &cobra.Command{
 	Use:   "link",
-	Short: "create symlink or hardlink to template files",
+	Short: "create symbolic link or hard link to template files",
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
 		if err != nil {
@@ -62,19 +62,24 @@ var linkCmd = &cobra.Command{
 				}
 			}
 
-			isHard, err := cmd.Flags().GetBool("force")
+			isHard, err := cmd.Flags().GetBool("hard")
 			if err != nil {
 				log.Fatalf("unable to get `hard` frag. %v", err)
 			}
 			if isHard {
 				err = os.Link(filepath.Join(td, file.Name()), filepath.Join(".", file.Name()))
+				if err == nil {
+					_, _ = fmt.Printf("created %s hard link\n", file.Name())
+				} else {
+					_, _ = fmt.Printf("not created %s hard link. %s\n", file.Name(), err)
+				}
 			} else {
 				err = os.Symlink(filepath.Join(td, file.Name()), filepath.Join(".", file.Name()))
-			}
-			if err == nil {
-				_, _ = fmt.Printf("created %s symlink\n", file.Name())
-			} else {
-				_, _ = fmt.Printf("not created %s symlink. %s\n", file.Name(), err)
+				if err == nil {
+					_, _ = fmt.Printf("created %s symblic link\n", file.Name())
+				} else {
+					_, _ = fmt.Printf("not created %s symblic link. %s\n", file.Name(), err)
+				}
 			}
 		}
 
