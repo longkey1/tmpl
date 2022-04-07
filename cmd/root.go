@@ -34,7 +34,7 @@ var config Config
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Version: "0.3.1",
+	Version: "0.3.2",
 	Use:   "tmpl",
 	Short: "template file linker",
 	// Uncomment the following line if your bare application
