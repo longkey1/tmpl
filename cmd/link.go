@@ -30,7 +30,7 @@ import (
 // linkCmd represents the link command
 var linkCmd = &cobra.Command{
 	Use:   "link",
-	Short: "create symlink to template files",
+	Short: "create symlink or hardlink to template files",
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
 		if err != nil {
@@ -49,7 +49,7 @@ var linkCmd = &cobra.Command{
 
 		isForce, err := cmd.Flags().GetBool("force")
 		if err != nil {
-			log.Fatalf("unable to get `force` frag. %v" , err)
+			log.Fatalf("unable to get `force` frag. %v", err)
 		}
 		for _, file := range files {
 			if isForce {
@@ -62,7 +62,15 @@ var linkCmd = &cobra.Command{
 				}
 			}
 
-			err := os.Symlink(filepath.Join(td, file.Name()), filepath.Join(".", file.Name()))
+			isHard, err := cmd.Flags().GetBool("force")
+			if err != nil {
+				log.Fatalf("unable to get `hard` frag. %v", err)
+			}
+			if isHard {
+				err = os.Link(filepath.Join(td, file.Name()), filepath.Join(".", file.Name()))
+			} else {
+				err = os.Symlink(filepath.Join(td, file.Name()), filepath.Join(".", file.Name()))
+			}
 			if err == nil {
 				_, _ = fmt.Printf("created %s symlink\n", file.Name())
 			} else {
@@ -77,7 +85,7 @@ var linkCmd = &cobra.Command{
 			return
 		}
 
-		excludeCurrent, err :=  os.Open(gitInfoExclude)
+		excludeCurrent, err := os.Open(gitInfoExclude)
 		if err != nil {
 			return
 		}
@@ -108,7 +116,7 @@ var linkCmd = &cobra.Command{
 					}
 				}
 			} else {
-				_, err := excludeNew.WriteString(scanner.Text()+"\n")
+				_, err := excludeNew.WriteString(scanner.Text() + "\n")
 				if err != nil {
 					log.Fatalf("unable to write to %s, %v", gitInfoExcludeNew, err)
 				}
@@ -123,7 +131,7 @@ var linkCmd = &cobra.Command{
 			for _, file := range files {
 				_, err = excludeNew.WriteString(fmt.Sprintf("/%s\n", file.Name()))
 				if err != nil {
-					log.Fatalf("unable to write start line to %s, %v" , gitInfoExcludeNew, err)
+					log.Fatalf("unable to write start line to %s, %v", gitInfoExcludeNew, err)
 				}
 			}
 			_, err = excludeNew.WriteString("###< tmpl ###\n")
@@ -134,7 +142,7 @@ var linkCmd = &cobra.Command{
 
 		err = os.Rename(excludeNew.Name(), excludeCurrent.Name())
 		if err != nil {
-			log.Fatalf("unable to rename from %s to %s. %v" ,excludeCurrent.Name(), excludeNew.Name(), err)
+			log.Fatalf("unable to rename from %s to %s. %v", excludeCurrent.Name(), excludeNew.Name(), err)
 		}
 	},
 }
@@ -152,4 +160,5 @@ func init() {
 	// is called directly, e.g.:
 	// linkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	linkCmd.Flags().BoolP("force", "f", false, "force link")
+	linkCmd.Flags().BoolP("hard", "h", false, "hard link")
 }

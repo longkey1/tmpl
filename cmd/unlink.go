@@ -30,7 +30,7 @@ import (
 // unlinkCmd represents the clean command
 var unlinkCmd = &cobra.Command{
 	Use:   "unlink",
-	Short: "remove symlink to template files",
+	Short: "remove symlink or hardlink to template files",
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
 		if err != nil {
@@ -62,7 +62,7 @@ var unlinkCmd = &cobra.Command{
 			return
 		}
 
-		excludeCurrent, err :=  os.Open(gitInfoExclude)
+		excludeCurrent, err := os.Open(gitInfoExclude)
 		if err != nil {
 			return
 		}
@@ -93,7 +93,7 @@ var unlinkCmd = &cobra.Command{
 					}
 				}
 			} else {
-				_, err := excludeNew.WriteString(scanner.Text()+"\n")
+				_, err := excludeNew.WriteString(scanner.Text() + "\n")
 				if err != nil {
 					log.Fatalf("unable to write to %s, %v", gitInfoExcludeNew, err)
 				}
@@ -102,7 +102,7 @@ var unlinkCmd = &cobra.Command{
 
 		err = os.Rename(excludeNew.Name(), excludeCurrent.Name())
 		if err != nil {
-			log.Fatalf("unable to rename from %s to %s. %v" ,excludeCurrent.Name(), excludeNew.Name(), err)
+			log.Fatalf("unable to rename from %s to %s. %v", excludeCurrent.Name(), excludeNew.Name(), err)
 		}
 	},
 }
