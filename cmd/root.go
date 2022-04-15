@@ -34,9 +34,9 @@ var config Config
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Version: "0.3.4",
-	Use:   "tmpl",
-	Short: "template file linker",
+	Version: "0.3.5",
+	Use:     "tmpl",
+	Short:   "template file linker",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -72,7 +72,7 @@ func initConfig() {
 		cobra.CheckErr(err)
 
 		// Search config in home/.config/toml directory with name "config.toml" (without extension).
-		viper.AddConfigPath(home+"/.config/tmpl")
+		viper.AddConfigPath(home + "/.config/tmpl")
 		viper.SetConfigName("config")
 		viper.SetConfigType("toml")
 	}
@@ -89,6 +89,6 @@ func initConfig() {
 
 	// set default template directory
 	if config.TemplateDir == "" {
-		config.TemplateDir = filepath.Dir(cfgFile)+"/templates"
+		config.TemplateDir = filepath.Dir(cfgFile) + "/templates"
 	}
 }
