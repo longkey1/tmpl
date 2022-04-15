@@ -43,8 +43,7 @@ var unlinkCmd = &cobra.Command{
 		td := fmt.Sprintf("%s/%s", config.TemplateDir, tn)
 		files, err := ioutil.ReadDir(td)
 		if err != nil {
-			_ = fmt.Errorf("unable to decode into struct, %v", err)
-			os.Exit(1)
+			log.Fatalf("unable to decode into struct, %v", err)
 		}
 		for _, file := range files {
 			err := os.Remove(fmt.Sprintf("./%s", file.Name()))
