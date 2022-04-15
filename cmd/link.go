@@ -40,7 +40,7 @@ var linkCmd = &cobra.Command{
 		td := filepath.Join(config.TemplateDir, tn)
 		files, err := ioutil.ReadDir(td)
 		if err != nil {
-			log.Fatalf("unable to decode into struct, %v", err)
+			log.Fatalf("unable to read %s, %v", td, err)
 		}
 
 		isForce, err := cmd.Flags().GetBool("force")
