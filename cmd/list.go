@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"io/ioutil"
-	"os"
+	"log"
 )
 
 // listCmd represents the list command
@@ -29,8 +29,7 @@ var listCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		files, err := ioutil.ReadDir(config.TemplateDir)
 		if err != nil {
-			_ = fmt.Errorf("unable to read dir, %v", err)
-			os.Exit(1)
+			log.Fatalf("unable to read dir, %v", err)
 		}
 		for _, file := range files {
 			if file.IsDir() == false {
