@@ -32,14 +32,11 @@ var linkCmd = &cobra.Command{
 	Use:   "link",
 	Short: "create symbolic link or hard link to template files",
 	Run: func(cmd *cobra.Command, args []string) {
-		wd, err := os.Getwd()
+		tn, err := cmd.Flags().GetString("target")
 		if err != nil {
-			panic(err)
+			log.Fatalf("unable to get `target` frag. %v", err)
 		}
-		tn := path.Base(wd)
-		if len(args) > 0 {
-			tn = args[0]
-		}
+
 		td := filepath.Join(config.TemplateDir, tn)
 		files, err := ioutil.ReadDir(td)
 		if err != nil {
@@ -166,4 +163,13 @@ func init() {
 	// linkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	linkCmd.Flags().BoolP("force", "f", false, "force link")
 	linkCmd.Flags().BoolP("hard", "", false, "hard link")
+	linkCmd.Flags().StringP("target", "t", currentDirname(), "template name")
+}
+
+func currentDirname() string {
+	wd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	return path.Base(wd)
 }
