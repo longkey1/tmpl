@@ -118,5 +118,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// unlinkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	linkCmd.Flags().StringP("target", "t", currentDirname(), "template name")
+	unlinkCmd.Flags().StringP("target", "t", currentDirname(), "template name")
 }
