@@ -32,21 +32,22 @@ var linkCmd = &cobra.Command{
 	Use:   "link",
 	Short: "create symbolic link or hard link to template files",
 	Run: func(cmd *cobra.Command, args []string) {
-		tn, err := cmd.Flags().GetString("target")
-		if err != nil {
-			log.Fatalf("unable to get `target` frag. %v", err)
+		wd, err := os.Getwd()
+		cobra.CheckErr(err)
+		tn := path.Base(wd)
+
+		t, err := cmd.Flags().GetString("target")
+		cobra.CheckErr(err)
+		if len(t) > 0 {
+			tn = t
 		}
 
 		td := filepath.Join(config.TemplateDir, tn)
 		files, err := ioutil.ReadDir(td)
-		if err != nil {
-			log.Fatalf("unable to read %s, %v", td, err)
-		}
+		cobra.CheckErr(err)
 
 		isForce, err := cmd.Flags().GetBool("force")
-		if err != nil {
-			log.Fatalf("unable to get `force` frag. %v", err)
-		}
+		cobra.CheckErr(err)
 		for _, file := range files {
 			if isForce {
 				_, err := os.Stat(file.Name())
