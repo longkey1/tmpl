@@ -33,18 +33,18 @@ var unlinkCmd = &cobra.Command{
 	Short: "remove symbolic link or hard link to template files",
 	Run: func(cmd *cobra.Command, args []string) {
 		wd, err := os.Getwd()
-		if err != nil {
-			panic(err)
-		}
+		cobra.CheckErr(err)
 		tn := path.Base(wd)
-		if len(args) > 0 {
-			tn = args[0]
+
+		t, err := cmd.Flags().GetString("target")
+		cobra.CheckErr(err)
+		if len(t) > 0 {
+			tn = t
 		}
+
 		td := fmt.Sprintf("%s/%s", config.TemplateDir, tn)
 		files, err := ioutil.ReadDir(td)
-		if err != nil {
-			log.Fatalf("unable to decode into struct, %v", err)
-		}
+		cobra.CheckErr(err)
 		for _, file := range files {
 			err := os.Remove(fmt.Sprintf("./%s", file.Name()))
 			if err == nil {
@@ -118,4 +118,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// unlinkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	linkCmd.Flags().StringP("target", "t", currentDirname(), "template name")
 }
