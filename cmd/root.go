@@ -24,13 +24,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfgFile string
-
 type Config struct {
 	TemplateDir string `mapstructure:"template_dir"`
 }
 
-var config Config
+var (
+	version = "dev"
+	cfgFile string
+	config Config
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
