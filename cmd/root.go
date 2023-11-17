@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"log"
 	"path/filepath"
@@ -29,16 +30,14 @@ type Config struct {
 }
 
 var (
-	version = "dev"
 	cfgFile string
-	config Config
+	config  Config
 )
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Version: "0.3.8",
-	Use:     "tmpl",
-	Short:   "template file linker",
+	Use:   "tmpl",
+	Short: "template file linker",
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -93,4 +92,8 @@ func initConfig() {
 	if config.TemplateDir == "" {
 		config.TemplateDir = filepath.Dir(cfgFile) + "/templates"
 	}
+}
+
+func SetVersionInfo(version, commit, date string) {
+	rootCmd.Version = fmt.Sprintf("%s (Built on %s from Git SHA %s)", version, date, commit)
 }
